@@ -1,0 +1,728 @@
+[
+  {
+    "item_id": 1,
+    "category": "concrete_noun",
+    "irish_target": "teach",
+    "english_gloss": "house",
+    "english_gloss_alternatives": [
+      "house"
+    ],
+    "word_length": 5,
+    "freq_rank": 79,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 2,
+    "category": "concrete_noun",
+    "irish_target": "bean",
+    "english_gloss": "woman",
+    "english_gloss_alternatives": [
+      "woman"
+    ],
+    "word_length": 4,
+    "freq_rank": 92,
+    "familiarity_rating": 7
+  },
+  {
+    "item_id": 3,
+    "category": "concrete_noun",
+    "irish_target": "scoil",
+    "english_gloss": "school",
+    "english_gloss_alternatives": [
+      "school"
+    ],
+    "word_length": 5,
+    "freq_rank": 107,
+    "familiarity_rating": 7
+  },
+  {
+    "item_id": 4,
+    "category": "concrete_noun",
+    "irish_target": "leabhar",
+    "english_gloss": "book",
+    "english_gloss_alternatives": [
+      "book"
+    ],
+    "word_length": 7,
+    "freq_rank": 139,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 5,
+    "category": "concrete_noun",
+    "irish_target": "lámh",
+    "english_gloss": "hand",
+    "english_gloss_alternatives": [
+      "hand"
+    ],
+    "word_length": 4,
+    "freq_rank": 144,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 6,
+    "category": "concrete_noun",
+    "irish_target": "airgead",
+    "english_gloss": "money",
+    "english_gloss_alternatives": [
+      "money"
+    ],
+    "word_length": 7,
+    "freq_rank": 157,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 7,
+    "category": "concrete_noun",
+    "irish_target": "béal",
+    "english_gloss": "mouth",
+    "english_gloss_alternatives": [
+      "mouth"
+    ],
+    "word_length": 4,
+    "freq_rank": 158,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 8,
+    "category": "concrete_noun",
+    "irish_target": "uisce",
+    "english_gloss": "water",
+    "english_gloss_alternatives": [
+      "water"
+    ],
+    "word_length": 5,
+    "freq_rank": 217,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 9,
+    "category": "concrete_noun",
+    "irish_target": "oileán",
+    "english_gloss": "island",
+    "english_gloss_alternatives": [
+      "island"
+    ],
+    "word_length": 6,
+    "freq_rank": 220,
+    "familiarity_rating": 6
+  },
+  {
+    "item_id": 10,
+    "category": "concrete_noun",
+    "irish_target": "cathair",
+    "english_gloss": "city",
+    "english_gloss_alternatives": [
+      "city"
+    ],
+    "word_length": 7,
+    "freq_rank": 238,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 11,
+    "category": "concrete_noun",
+    "irish_target": "doras",
+    "english_gloss": "door",
+    "english_gloss_alternatives": [
+      "door"
+    ],
+    "word_length": 5,
+    "freq_rank": 243,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 12,
+    "category": "concrete_noun",
+    "irish_target": "cos",
+    "english_gloss": "leg",
+    "english_gloss_alternatives": [
+      "leg"
+    ],
+    "word_length": 3,
+    "freq_rank": 249,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 13,
+    "category": "concrete_noun",
+    "irish_target": "croí",
+    "english_gloss": "heart",
+    "english_gloss_alternatives": [
+      "heart"
+    ],
+    "word_length": 4,
+    "freq_rank": 258,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 14,
+    "category": "concrete_noun",
+    "irish_target": "múinteoir",
+    "english_gloss": "teacher",
+    "english_gloss_alternatives": [
+      "teacher"
+    ],
+    "word_length": 9,
+    "freq_rank": 310,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 15,
+    "category": "concrete_noun",
+    "irish_target": "bia",
+    "english_gloss": "food",
+    "english_gloss_alternatives": [
+      "food"
+    ],
+    "word_length": 3,
+    "freq_rank": 384,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 16,
+    "category": "abstract_noun",
+    "irish_target": "bliain",
+    "english_gloss": "year",
+    "english_gloss_alternatives": [
+      "year"
+    ],
+    "word_length": 6,
+    "freq_rank": 39,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 17,
+    "category": "abstract_noun",
+    "irish_target": "lá",
+    "english_gloss": "day",
+    "english_gloss_alternatives": [
+      "day"
+    ],
+    "word_length": 2,
+    "freq_rank": 59,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 18,
+    "category": "abstract_noun",
+    "irish_target": "taobh",
+    "english_gloss": "side (noun)",
+    "english_gloss_alternatives": [
+      "side (noun)"
+    ],
+    "word_length": 5,
+    "freq_rank": 72,
+    "familiarity_rating": 2
+  },
+  {
+    "item_id": 19,
+    "category": "abstract_noun",
+    "irish_target": "scéal",
+    "english_gloss": "story",
+    "english_gloss_alternatives": [
+      "story"
+    ],
+    "word_length": 5,
+    "freq_rank": 83,
+    "familiarity_rating": 6
+  },
+  {
+    "item_id": 20,
+    "category": "abstract_noun",
+    "irish_target": "tír",
+    "english_gloss": "country",
+    "english_gloss_alternatives": [
+      "country"
+    ],
+    "word_length": 3,
+    "freq_rank": 84,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 21,
+    "category": "abstract_noun",
+    "irish_target": "saol",
+    "english_gloss": "lifetime",
+    "english_gloss_alternatives": [
+      "lifetime"
+    ],
+    "word_length": 4,
+    "freq_rank": 85,
+    "familiarity_rating": 2
+  },
+  {
+    "item_id": 22,
+    "category": "abstract_noun",
+    "irish_target": "ceist",
+    "english_gloss": "question (noun)",
+    "english_gloss_alternatives": [
+      "question (noun)"
+    ],
+    "word_length": 5,
+    "freq_rank": 89,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 23,
+    "category": "abstract_noun",
+    "irish_target": "teanga",
+    "english_gloss": "language",
+    "english_gloss_alternatives": [
+      "language"
+    ],
+    "word_length": 6,
+    "freq_rank": 115,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 24,
+    "category": "abstract_noun",
+    "irish_target": "oíche",
+    "english_gloss": "night",
+    "english_gloss_alternatives": [
+      "night"
+    ],
+    "word_length": 5,
+    "freq_rank": 126,
+    "familiarity_rating": 6
+  },
+  {
+    "item_id": 25,
+    "category": "abstract_noun",
+    "irish_target": "aire",
+    "english_gloss": "care/attention",
+    "english_gloss_alternatives": [
+      "care",
+      "attention"
+    ],
+    "word_length": 4,
+    "freq_rank": 127,
+    "familiarity_rating": 2
+  },
+  {
+    "item_id": 26,
+    "category": "abstract_noun",
+    "irish_target": "eolas",
+    "english_gloss": "knowledge",
+    "english_gloss_alternatives": [
+      "knowledge"
+    ],
+    "word_length": 5,
+    "freq_rank": 132,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 27,
+    "category": "abstract_noun",
+    "irish_target": "seachtain",
+    "english_gloss": "week",
+    "english_gloss_alternatives": [
+      "week"
+    ],
+    "word_length": 9,
+    "freq_rank": 142,
+    "familiarity_rating": 6
+  },
+  {
+    "item_id": 28,
+    "category": "abstract_noun",
+    "irish_target": "aimsir",
+    "english_gloss": "weather",
+    "english_gloss_alternatives": [
+      "weather"
+    ],
+    "word_length": 6,
+    "freq_rank": 278,
+    "familiarity_rating": 6
+  },
+  {
+    "item_id": 29,
+    "category": "abstract_noun",
+    "irish_target": "gaoth",
+    "english_gloss": "wind",
+    "english_gloss_alternatives": [
+      "wind"
+    ],
+    "word_length": 5,
+    "freq_rank": 381,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 30,
+    "category": "abstract_noun",
+    "irish_target": "dath",
+    "english_gloss": "colour",
+    "english_gloss_alternatives": [
+      "colour"
+    ],
+    "word_length": 4,
+    "freq_rank": 456,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 31,
+    "category": "verb",
+    "irish_target": "cuir",
+    "english_gloss": "to put",
+    "english_gloss_alternatives": [
+      "to put"
+    ],
+    "word_length": 4,
+    "freq_rank": 17,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 32,
+    "category": "verb",
+    "irish_target": "déan",
+    "english_gloss": "to do",
+    "english_gloss_alternatives": [
+      "to do"
+    ],
+    "word_length": 4,
+    "freq_rank": 20,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 33,
+    "category": "verb",
+    "irish_target": "tabhair",
+    "english_gloss": "to give/grant",
+    "english_gloss_alternatives": [
+      "to give",
+      "grant"
+    ],
+    "word_length": 7,
+    "freq_rank": 24,
+    "familiarity_rating": 2
+  },
+  {
+    "item_id": 34,
+    "category": "verb",
+    "irish_target": "tar",
+    "english_gloss": "to come",
+    "english_gloss_alternatives": [
+      "to come"
+    ],
+    "word_length": 3,
+    "freq_rank": 33,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 35,
+    "category": "verb",
+    "irish_target": "faigh",
+    "english_gloss": "to get/receive",
+    "english_gloss_alternatives": [
+      "to get",
+      "receive"
+    ],
+    "word_length": 5,
+    "freq_rank": 36,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 36,
+    "category": "verb",
+    "irish_target": "téigh",
+    "english_gloss": "to go",
+    "english_gloss_alternatives": [
+      "to go"
+    ],
+    "word_length": 5,
+    "freq_rank": 41,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 37,
+    "category": "verb",
+    "irish_target": "feic",
+    "english_gloss": "to see",
+    "english_gloss_alternatives": [
+      "to see"
+    ],
+    "word_length": 4,
+    "freq_rank": 76,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 38,
+    "category": "verb",
+    "irish_target": "féad",
+    "english_gloss": "to be able to",
+    "english_gloss_alternatives": [
+      "to be able to"
+    ],
+    "word_length": 4,
+    "freq_rank": 88,
+    "familiarity_rating": 2
+  },
+  {
+    "item_id": 39,
+    "category": "verb",
+    "irish_target": "éirigh",
+    "english_gloss": "to get up/to rise",
+    "english_gloss_alternatives": [
+      "to get up",
+      "to rise"
+    ],
+    "word_length": 6,
+    "freq_rank": 101,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 40,
+    "category": "verb",
+    "irish_target": "iarr",
+    "english_gloss": "to ask",
+    "english_gloss_alternatives": [
+      "to ask"
+    ],
+    "word_length": 4,
+    "freq_rank": 119,
+    "familiarity_rating": 2
+  },
+  {
+    "item_id": 41,
+    "category": "verb",
+    "irish_target": "imigh",
+    "english_gloss": "to leave/go away",
+    "english_gloss_alternatives": [
+      "to leave",
+      "go away"
+    ],
+    "word_length": 5,
+    "freq_rank": 133,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 42,
+    "category": "verb",
+    "irish_target": "lean",
+    "english_gloss": "to follow",
+    "english_gloss_alternatives": [
+      "to follow"
+    ],
+    "word_length": 4,
+    "freq_rank": 136,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 43,
+    "category": "verb",
+    "irish_target": "scríobh",
+    "english_gloss": "to write",
+    "english_gloss_alternatives": [
+      "to write"
+    ],
+    "word_length": 7,
+    "freq_rank": 140,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 44,
+    "category": "verb",
+    "irish_target": "siúil",
+    "english_gloss": "to walk",
+    "english_gloss_alternatives": [
+      "to walk"
+    ],
+    "word_length": 5,
+    "freq_rank": 163,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 45,
+    "category": "verb",
+    "irish_target": "tosaigh",
+    "english_gloss": "to start",
+    "english_gloss_alternatives": [
+      "to start"
+    ],
+    "word_length": 7,
+    "freq_rank": 203,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 46,
+    "category": "adjective",
+    "irish_target": "ceart",
+    "english_gloss": "correct",
+    "english_gloss_alternatives": [
+      "correct"
+    ],
+    "word_length": 5,
+    "freq_rank": 80,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 47,
+    "category": "adjective",
+    "irish_target": "te",
+    "english_gloss": "hot",
+    "english_gloss_alternatives": [
+      "hot"
+    ],
+    "word_length": 2,
+    "freq_rank": 98,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 48,
+    "category": "adjective",
+    "irish_target": "óg",
+    "english_gloss": "young",
+    "english_gloss_alternatives": [
+      "young"
+    ],
+    "word_length": 2,
+    "freq_rank": 121,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 49,
+    "category": "adjective",
+    "irish_target": "fada",
+    "english_gloss": "long",
+    "english_gloss_alternatives": [
+      "long"
+    ],
+    "word_length": 4,
+    "freq_rank": 137,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 50,
+    "category": "adjective",
+    "irish_target": "ard",
+    "english_gloss": "tall/high",
+    "english_gloss_alternatives": [
+      "tall",
+      "high"
+    ],
+    "word_length": 3,
+    "freq_rank": 154,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 51,
+    "category": "adjective",
+    "irish_target": "iomlán",
+    "english_gloss": "full",
+    "english_gloss_alternatives": [
+      "full"
+    ],
+    "word_length": 6,
+    "freq_rank": 212,
+    "familiarity_rating": 2
+  },
+  {
+    "item_id": 52,
+    "category": "adjective",
+    "irish_target": "fíor",
+    "english_gloss": "true",
+    "english_gloss_alternatives": [
+      "true"
+    ],
+    "word_length": 4,
+    "freq_rank": 305,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 53,
+    "category": "adjective",
+    "irish_target": "gearr",
+    "english_gloss": "short",
+    "english_gloss_alternatives": [
+      "short"
+    ],
+    "word_length": 5,
+    "freq_rank": 315,
+    "familiarity_rating": 2
+  },
+  {
+    "item_id": 54,
+    "category": "adjective",
+    "irish_target": "láidir",
+    "english_gloss": "strong",
+    "english_gloss_alternatives": [
+      "strong"
+    ],
+    "word_length": 6,
+    "freq_rank": 339,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 55,
+    "category": "adjective",
+    "irish_target": "beo",
+    "english_gloss": "alive",
+    "english_gloss_alternatives": [
+      "alive"
+    ],
+    "word_length": 3,
+    "freq_rank": 364,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 56,
+    "category": "adjective",
+    "irish_target": "bocht",
+    "english_gloss": "poor",
+    "english_gloss_alternatives": [
+      "poor"
+    ],
+    "word_length": 5,
+    "freq_rank": 370,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 57,
+    "category": "adjective",
+    "irish_target": "iontach",
+    "english_gloss": "great",
+    "english_gloss_alternatives": [
+      "great"
+    ],
+    "word_length": 7,
+    "freq_rank": 407,
+    "familiarity_rating": 5
+  },
+  {
+    "item_id": 58,
+    "category": "adjective",
+    "irish_target": "glan",
+    "english_gloss": "clean",
+    "english_gloss_alternatives": [
+      "clean"
+    ],
+    "word_length": 4,
+    "freq_rank": 432,
+    "familiarity_rating": 4
+  },
+  {
+    "item_id": 59,
+    "category": "adjective",
+    "irish_target": "bog",
+    "english_gloss": "soft",
+    "english_gloss_alternatives": [
+      "soft"
+    ],
+    "word_length": 3,
+    "freq_rank": 461,
+    "familiarity_rating": 3
+  },
+  {
+    "item_id": 60,
+    "category": "adjective",
+    "irish_target": "sean",
+    "english_gloss": "old",
+    "english_gloss_alternatives": [
+      "old"
+    ],
+    "word_length": 4,
+    "freq_rank": 706,
+    "familiarity_rating": 6
+  }
+]
