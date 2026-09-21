@@ -148,9 +148,10 @@ function FieldRenderer({ field, value, onChange }) {
  * values keyed exactly by the target Postgres column name, so the caller can
  * pass the submitted object straight into a row insert.
  */
-export function SchemaForm({ title, fields, onSubmit, submitLabel = "Continue" }) {
+export function SchemaForm({ title, fields, onSubmit, submitLabel = "Continue", disabled = false, externalError = null }) {
   const [values, setValues] = useState({});
   const [error, setError] = useState(null);
+  const displayError = error ?? externalError;
 
   function setValue(key, value) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -182,12 +183,14 @@ export function SchemaForm({ title, fields, onSubmit, submitLabel = "Continue" }
           </div>
         ) : null
       )}
-      {error && (
+      {displayError && (
         <p role="alert" className="form-error">
-          {error}
+          {displayError}
         </p>
       )}
-      <button type="submit">{submitLabel}</button>
+      <button type="submit" disabled={disabled}>
+        {submitLabel}
+      </button>
     </form>
   );
 }

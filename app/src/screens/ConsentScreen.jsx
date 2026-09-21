@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { writeRow } from "../lib/dataWriter";
 import { logSessionEvent } from "../lib/sessionEvents";
+import { isTestModeEnabled } from "../lib/testMode";
 
 const APP_VERSION = "v1";
 const CONSENT_VERSION = "v28";
@@ -28,6 +29,7 @@ export function ConsentScreen({ onConsented }) {
       age_18_plus_confirmed: true,
       consent_version: CONSENT_VERSION,
       app_version: APP_VERSION,
+      is_test: isTestModeEnabled(),
     });
     logSessionEvent(participantId, "consent_given");
 

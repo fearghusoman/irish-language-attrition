@@ -14,6 +14,9 @@
 -- Not readable by anon: no GRANT is issued on this view to anon, so (like the
 -- base tables) it's only queryable via the service_role key / SQL editor.
 --
+-- Excludes test-mode sessions (participants.is_test) — see
+-- supabase/migration_add_is_test_flag.sql if your project predates that column.
+--
 -- Usage: run this once (as service_role), then for each export:
 --   SELECT * FROM questionnaire_export;  -- and save as questionnaire_data.csv
 --
@@ -149,4 +152,5 @@ left join lateral (
     ) as lang_overflow
   from additional_languages al
   where al.participant_id = p.participant_id
-) lang on true;
+) lang on true
+where not p.is_test;

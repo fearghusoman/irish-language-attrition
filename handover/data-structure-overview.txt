@@ -1,0 +1,148 @@
+UNDERSTANDING YOUR GORILLA DATA EXPORTS
+========================================
+
+This is a plain-language guide to the data files Gorilla produces for this
+study, so you know what each one is for, which ones you actually need, and
+which ones you can ignore.
+
+For every part of the study, Gorilla gives you TWO VERSIONS of the same
+data:
+
+  - A LONG version - a detailed, moment-by-moment log (every page load,
+    every click, every keystroke event). This is Gorilla's "raw" record of
+    everything that happened.
+
+  - A SHORT version - a tidied-up summary, generally one row per
+    participant, with each answer in its own column.
+
+You don't need to understand the long version to do the analysis. Where
+noted below, it can be safely ignored.
+
+
+(1) CONSENT FORM
+-----------------
+
+What it is: the very first screen participants see - a single checkbox:
+"I agree to take part in this study."
+
+Files: Gorilla names these files starting "data-questionnaire-y8cn..."
+
+  - Long version - IGNORE IT. It's just a play-by-play of the consent
+    screen loading and the checkbox being ticked. Nothing in it is needed
+    for analysis.
+
+  - Short version - this is GOOD ENOUGH ON ITS OWN. It has one row per
+    participant with a single answer column recording whether they
+    agreed.
+
+One quirk to watch for: in the short version, the very first row of data
+is NOT a real participant - it's a repeated copy of the question text
+itself (Gorilla uses it as a sort of built-in label). Skip that row. The
+real participant rows are the ones with an actual ID number in the
+"Participant Private ID" column. There's sometimes also a completely
+blank row at the very end of the file - that can be ignored too.
+
+How it's used in analysis: mostly as a sanity check - confirming everyone
+in the dataset actually agreed to take part and that their session shows
+as "complete" before including them in anything else.
+
+
+(2) RECALL TRIAL 1 - English shown, Irish typed
+-------------------------------------------------
+
+What it is: participants are shown an English word and type in the Irish
+translation, one at a time, for all 60 words in the list. This is the
+main "how much can you actively remember" test.
+
+Files: Gorilla names these files starting "data-task-3js1..."
+
+There is only ONE version of this file (no short/summary version exists
+for the word tasks) - every row is one moment in the process (a word
+appearing, an answer being typed and submitted, etc.), so a small amount
+of filtering is needed to pull out just the real, scored attempts. In
+plain terms, the useful columns are:
+
+  - which English word was shown
+  - what the participant actually typed
+  - whether Gorilla marked it right or wrong
+  - how long they took to answer
+
+Important caveat: Gorilla's own right/wrong marking is quite strict - it
+doesn't forgive a missing accent mark (a "fada", e.g. i, e, o) or a small
+typo. Because of that, a second, fairer scoring pass is needed on top of
+Gorilla's raw marking before the results are final - this has already
+been built (see the "analysis" folder), it just needs to be run on top of
+the raw export rather than trusting Gorilla's "Correct" column as-is.
+
+How it's used: this becomes the "production" or "recall" score - the
+percentage of words a participant could produce entirely from memory.
+
+
+(3) RECALL TRIAL 2 - Irish shown, English typed
+-------------------------------------------------
+
+What it is: the follow-up to Trial 1. Only the words a participant
+DIDN'T get right the first time are tested again here - this time the
+Irish word is shown and they translate it into English. This is designed
+to check whether a word not actively recalled is still recognisable to
+them.
+
+Files: Gorilla names these files starting "data-task-vl4k..."
+
+Same file structure as Trial 1 (long-format only, same filtering needed
+to get to the real scored attempts).
+
+One quirk to watch for: every one of the 60 words gets a brief
+flash/preview step first, regardless of whether it's actually re-tested -
+so the file will look like it references all 60 words, but only the
+subset the participant missed in Trial 1 (roughly half, typically) is
+actually a real, scored question here. The rest are just that brief
+preview step and shouldn't be counted as test attempts.
+
+Same caveat as Trial 1 applies to the right/wrong marking - a fairer
+rescoring pass is needed on top of Gorilla's raw marking.
+
+How it's used: combined with Trial 1, this gives the full retention
+picture for each word - fully recalled / recognised only / neither -
+rather than just a flat right-or-wrong score.
+
+
+(4) QUESTIONNAIRE
+-------------------
+
+What it is: the background survey - around 55 questions covering
+demographics, Irish-language history, current habits, attitudes, and
+motivation.
+
+Files: Gorilla names these files starting "data-questionnaire-cimk..."
+
+  - Long version - IGNORE IT. Same as the consent form, this is a
+    detailed event log of every question being displayed and answered.
+    Not needed.
+
+  - Short version - this is GOOD ENOUGH ON ITS OWN, and is actually the
+    more convenient of the two: one row per participant, one column per
+    question, and it already includes a handy numeric code alongside
+    each scale-type answer (e.g. a "Rarely" answer also comes with a
+    plain number next to it), which makes the scoring calculations much
+    easier.
+
+Same quirk as the consent form: the first row of data in the short
+version is a repeated copy of the question text, not a real participant
+- skip it. Ignore any fully blank row at the end too. The real rows have
+an actual participant ID in them.
+
+One tip for later: once there are many participants, download the short
+version for EVERYONE AT ONCE in a single file, rather than downloading
+one file per participant. Because a few questions are only shown to some
+participants depending on their earlier answers, downloading everyone
+together keeps the columns consistent across the whole group - whereas
+separate per-person downloads can end up with slightly different columns
+from each other.
+
+How it's used: each column feeds directly into the analysis. Related
+questions are grouped and averaged into the composite scores the study
+is built around (e.g. several questions about how often someone hears or
+uses Irish get combined into a single "exposure" score; several
+questions about how connected someone feels to Irish culture get
+combined into a "motivation" score, and so on).

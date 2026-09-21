@@ -9,12 +9,21 @@ import { writeRow } from "../../lib/dataWriter";
  */
 export function QuestionnairePartScreen({ table, title, fields, participantId, onComplete }) {
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   async function handleSubmit(values) {
     if (submitting) return;
     setSubmitting(true);
-    await writeRow(table, { participant_id: participantId, ...values });
-    onComplete();
+    setError(null);
+    try {
+      await writeRow(table, { participant_id: participantId, ...values });
+      onComplete();
+    } catch (err) {
+      console.error(`[QuestionnairePartScreen] submit for "${table}" failed:`, err);
+      setError("Something went wrong saving your answers. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -22,6 +31,8 @@ export function QuestionnairePartScreen({ table, title, fields, participantId, o
       title={title}
       fields={fields}
       submitLabel={submitting ? "Saving…" : "Continue"}
+      disabled={submitting}
+      externalError={error}
       onSubmit={handleSubmit}
     />
   );

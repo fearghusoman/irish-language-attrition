@@ -10,7 +10,13 @@
 --     through the public anon endpoint.
 --
 -- Run this once against a fresh Supabase project (EU region, e.g. Frankfurt, for GDPR).
--- Then run supabase/seed_word_items.sql (also via service_role) to load the 60 word items.
+-- Then run supabase/seed_word_items.sql (also via service_role) to load the 60 word items,
+-- and supabase/questionnaire_export_view.sql + supabase/trials_export_view.sql for the
+-- R-analysis-ready export views.
+--
+-- If you're applying this to a project that already exists (i.e. you ran an earlier
+-- version of this file without `is_test`), run supabase/migration_add_is_test_flag.sql
+-- instead of re-running this whole file.
 
 -- ============================================================================
 -- participants
@@ -23,6 +29,10 @@ create table participants (
   consent_version text not null default 'v28',
   app_version text,
   consented_at timestamptz not null default now(),
+  -- True for sessions run in the app's test mode (VITE_TEST_MODE), e.g. developer/
+  -- researcher click-throughs with a shortened wordlist. Every export view filters
+  -- these out — see questionnaire_export_view.sql / trials_export_view.sql.
+  is_test boolean not null default false,
 
   constraint participants_consent_required check (consent_given and age_18_plus_confirmed)
 );

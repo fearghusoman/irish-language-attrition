@@ -64,6 +64,26 @@ describe("writeRow", () => {
     expect(result).toEqual({ ok: false, queued: true });
     expect(loadPendingQueue()).toEqual([{ table: "questionnaire_part2", row, queuedAt: expect.any(Number) }]);
   });
+
+  it("does not hang forever when the network call never settles", async () => {
+    vi.useFakeTimers();
+    try {
+      const insert = vi.fn(() => new Promise(() => {})); // never resolves or rejects
+      supabase.from.mockReturnValue({ insert });
+
+      const row = { participant_id: "p1" };
+      const pending = writeRow("questionnaire_part2", row);
+
+      // Advance past the per-attempt timeout for all 3 attempts plus backoff.
+      await vi.advanceTimersByTimeAsync(60000);
+
+      const result = await pending;
+      expect(result).toEqual({ ok: false, queued: true });
+      expect(loadPendingQueue()).toEqual([{ table: "questionnaire_part2", row, queuedAt: expect.any(Number) }]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
 
 describe("flushPendingWrites", () => {

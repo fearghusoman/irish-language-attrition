@@ -3,6 +3,7 @@ import wordlist from "./data/wordlist.json";
 import { shuffle } from "./lib/shuffle";
 import { logSessionEvent } from "./lib/sessionEvents";
 import { flushPendingWrites } from "./lib/dataWriter";
+import { selectWordlist } from "./lib/testMode";
 
 import { ConsentScreen } from "./screens/ConsentScreen";
 import { TaskInstructionsScreen } from "./screens/TaskInstructionsScreen";
@@ -77,7 +78,7 @@ function App() {
       return (
         <PracticeScreen
           onComplete={() => {
-            setRecallOrder(shuffle(wordlist));
+            setRecallOrder(shuffle(selectWordlist(wordlist)));
             logSessionEvent(participantId, "task_started");
             setScreen(SCREEN.RECALL);
           }}
@@ -126,6 +127,7 @@ function App() {
     case SCREEN.QUESTIONNAIRE_PART1:
       return (
         <QuestionnairePartScreen
+          key="questionnaire_part1"
           table="questionnaire_part1"
           title="Part 1 — General background"
           fields={PART1_FIELDS}
@@ -137,6 +139,7 @@ function App() {
     case SCREEN.QUESTIONNAIRE_PART2:
       return (
         <QuestionnairePartScreen
+          key="questionnaire_part2"
           table="questionnaire_part2"
           title="Part 2 — Proficiency at end of instruction"
           fields={PART2_FIELDS}
@@ -148,6 +151,7 @@ function App() {
     case SCREEN.QUESTIONNAIRE_PART3:
       return (
         <QuestionnairePartScreen
+          key="questionnaire_part3"
           table="questionnaire_part3"
           title="Part 3 — Exposure to Irish since the end of formal instruction"
           fields={PART3_FIELDS}
@@ -159,6 +163,7 @@ function App() {
     case SCREEN.QUESTIONNAIRE_PART4:
       return (
         <QuestionnairePartScreen
+          key="questionnaire_part4"
           table="questionnaire_part4"
           title="Part 4 — Motivation"
           fields={PART4_FIELDS}
@@ -175,6 +180,7 @@ function App() {
     case SCREEN.QUESTIONNAIRE_PART6:
       return (
         <QuestionnairePartScreen
+          key="questionnaire_part6"
           table="questionnaire_part6"
           title="Part 6 — Background"
           fields={PART6_FIELDS}

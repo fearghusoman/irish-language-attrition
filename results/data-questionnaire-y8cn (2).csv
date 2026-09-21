@@ -1,0 +1,5 @@
+﻿Event Index,UTC Timestamp,UTC Date and Time,Local Timestamp,Local Timezone,Local Date and Time,Experiment ID,Experiment Version,Tree Node Key,Repeat Key,Schedule ID,Participant Public ID,Participant Private ID,Participant Starting Group,Participant Status,Participant Completion Code,Participant External Session ID,Participant Device Type,Participant Device,Participant OS,Participant Browser,Participant Monitor Size,Participant Viewport Size,Checkpoint,Room ID,Room Order,Task Name,Task Version,"Consent Form object-4 I agree to take part in this study
+-"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,"By clicking “I agree” below, you confirm that you are 18 or older, that you have read and understood the above, and that you consent to take part."
+1,1788536687784,04/09/2026 15:44:47,1788536687784,1,04/09/2026 16:44:47,279099,18,questionnaire-y8cn,,58068475,,16572762,,complete,,,computer,Desktop or Laptop,Mac OS 10.15.7,Chrome 152.0.0.0,1728x1117,1271x873,,,0,Questionnaire - Consent,4,1
+END OF FILE
