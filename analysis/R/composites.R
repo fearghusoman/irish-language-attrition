@@ -58,7 +58,9 @@ compute_predictors <- function(questionnaire_wide, cao_lookup = NULL) {
     )
   }
 
-  qw$proficiency_used_fallback <- grepl("^Did not sit", qw$leaving_cert_paper, ignore.case = TRUE)
+  # NOTE: the real deployed dropdown wording is "Did not take Leaving Cert
+  # Irish" (not "sit", as v35's draft text has it) -- match both.
+  qw$proficiency_used_fallback <- grepl("^Did not (sit|take)", qw$leaving_cert_paper, ignore.case = TRUE)
   qw$proficiency_fallback_self_rated <- qw$no_lc_self_rated_proficiency
 
   if (is.null(cao_lookup)) {
@@ -109,12 +111,11 @@ compute_descriptive_composites <- function(questionnaire_wide) {
   )
   qw$linguistic_identity_now_composite <- mean_of("linguistic_identity_q49", "linguistic_identity_q50")
 
-  # NOTE: computed from all 3 items as actually deployed (rs_exams,
-  # rs_personal_int, rs_practical) -- the v24 codebook specifies a 2-item
-  # version (Q25-26 only, reworded), but the questionnaire as built and
-  # fielded collected 3 items in the pre-v24 wording. Per project decision,
-  # this uses the real collected data rather than silently dropping an item.
-  qw$instrumental_motivation_composite <- mean_of("instrumental_q25", "instrumental_q26", "instrumental_q27")
+  # 2 items (Q25-26), matching both the v24 codebook and the real deployed
+  # build (rs_exams/rs_practical) -- an earlier pilot build had a 3rd item
+  # ("rs_personal_int"), but it isn't present in the final questionnaire
+  # (v35) or in the real 47-participant export.
+  qw$instrumental_motivation_composite <- mean_of("instrumental_q25", "instrumental_q26")
 
   qw$self_rated_attrition <- suppressWarnings(as.numeric(qw$self_rated_attrition_q51))
   qw$reconnection_motivation <- suppressWarnings(as.numeric(qw$reconnection_motivation_q52))

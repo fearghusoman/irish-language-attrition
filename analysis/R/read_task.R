@@ -1,12 +1,23 @@
 # Step 2: read a Gorilla task (word-recall/recognition) export and filter it
 # down to one row per real scored trial.
+#
+# The real production export (results/21092026) is a single .xlsx file
+# containing BOTH rounds, distinguished by `Task Name` ("Round 1: Recall" /
+# "Round 2: Recognition"). The earlier sample CSVs are already split one
+# round per file (with different Task Name strings entirely), so the
+# `task_name` filter below is optional and only applied when supplied.
 
+library(readxl)
 library(readr)
 library(dplyr)
 
-#' Read a raw Gorilla task long-format export as all-character columns.
+#' Read a raw Gorilla task export (.csv or .xlsx) as all-character columns.
 read_gorilla_task_long <- function(path) {
-  df <- read_csv(path, col_types = cols(.default = "c"), na = character())
+  df <- if (grepl("\\.xlsx?$", path, ignore.case = TRUE)) {
+    readxl::read_excel(path, col_types = "text")
+  } else {
+    read_csv(path, col_types = cols(.default = "c"), na = character())
+  }
   names(df) <- sub("^﻿", "", names(df))
   df
 }
@@ -28,8 +39,16 @@ read_gorilla_task_long <- function(path) {
 #' @param word_col Name of the stimulus column to keep: `"Spreadsheet: English"`
 #'   for Round 1 (English shown, Irish typed) or `"Spreadsheet: Irish"` for
 #'   Round 2 (Irish shown, English typed).
-extract_task_trials <- function(path, word_col) {
-  read_gorilla_task_long(path) %>%
+#' @param task_name Optional `Task Name` value to filter to first -- needed
+#'   when `path` is a single combined export holding both rounds (real
+#'   data: `"Round 1: Recall"` / `"Round 2: Recognition"`). `NULL` (default)
+#'   skips this filter, for exports that already contain only one round.
+extract_task_trials <- function(path, word_col, task_name = NULL) {
+  df <- read_gorilla_task_long(path)
+  if (!is.null(task_name)) {
+    df <- df %>% filter(`Task Name` == task_name)
+  }
+  df %>%
     filter(Screen == "Trial", `Response Type` == "response") %>%
     transmute(
       participant_id = `Participant Private ID`,

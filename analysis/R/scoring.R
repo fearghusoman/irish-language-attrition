@@ -7,6 +7,14 @@
 # but both are within the fada-stripped Levenshtein-1 tolerance below, so
 # should count as correct once rescored.
 #
+# NOTE ON THE WORDLIST JOIN: `trial_number` is each participant's
+# randomized *presentation order*, not a stable item key -- it is NOT safe
+# to join against `wordlist$item_id`. The stimulus actually shown
+# (`item_word`, from `extract_task_trials()`) must be matched against the
+# wordlist's own target/gloss text instead (see `rescore_task_trials()`
+# below), which is guaranteed unique and confirmed to match exactly against
+# the real data.
+#
 # NOTE ON THE LENGTH CUTOFF: the codebook specifies "Levenshtein distance
 # <=1 for short words, <=2 for longer words" but does not define "short" vs
 # "longer" numerically. This implementation uses <=4 characters (after
@@ -79,10 +87,15 @@ score_lexical_response <- function(target, response,
 }
 
 #' Rescore a full trial-level tibble (from `extract_task_trials()`) against
-#' `wordlist.json`, joining by `trial_number == item_id`.
+#' `wordlist.json`, joining by the actual displayed word text (`item_word`)
+#' against the wordlist's target/gloss -- NOT by `trial_number` (see note
+#' above).
 #'
 #' Adds `correct_rescored` (TRUE/FALSE/NA per `score_lexical_response()`)
-#' alongside the original `correct_gorilla` flag for comparison.
+#' alongside the original `correct_gorilla` flag for comparison, and keeps
+#' `item_id` plus the item-level attributes (`category`, `word_length`,
+#' `freq_rank`, `familiarity_rating`) needed downstream for the trial-level
+#' dataset's item fixed effects (`build_trial_level_dataset()`).
 #'
 #' @param wordlist The parsed wordlist (e.g. via
 #'   `jsonlite::fromJSON("app/src/data/wordlist.json")`).
@@ -91,10 +104,14 @@ rescore_task_trials <- function(trials, wordlist, direction = c("recall", "recog
   direction <- match.arg(direction)
 
   wl <- wordlist %>%
-    select(item_id, irish_target, english_gloss, english_gloss_alternatives)
+    select(item_id, category, word_length, freq_rank, familiarity_rating,
+           irish_target, english_gloss, english_gloss_alternatives)
+
+  join_col <- if (direction == "recall") "english_gloss" else "irish_target"
+  join_by <- setNames(join_col, "item_word")
 
   trials %>%
-    left_join(wl, by = c("trial_number" = "item_id")) %>%
+    left_join(wl, by = join_by) %>%
     rowwise() %>%
     mutate(
       correct_rescored = score_lexical_response(
@@ -105,5 +122,5 @@ rescore_task_trials <- function(trials, wordlist, direction = c("recall", "recog
       )
     ) %>%
     ungroup() %>%
-    select(-irish_target, -english_gloss, -english_gloss_alternatives)
+    select(-any_of(c("irish_target", "english_gloss")), -english_gloss_alternatives)
 }

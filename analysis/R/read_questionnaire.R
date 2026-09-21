@@ -1,47 +1,49 @@
-# Step 1: read a Gorilla questionnaire "long" export (one row per
-# page/question event) and reshape it to one row per participant, keeping
-# only the columns that hold real answers.
+# Step 1: read the real Gorilla questionnaire export and reshape it to one
+# row per participant, keeping only the columns that hold real answers.
 #
 # Requires gorilla_object_map.R to already be sourced (run_pipeline.R does
 # this in order).
+#
+# The real export (results/21092026/data_exp_279099-vall_questionnaires.xlsx)
+# is WIDE, not long: each participant contributes exactly 2 rows sharing a
+# `Task Name` -- "Questionnaire - Consent" (just the consent checkbox) and
+# "Questionnaire" (every other answer, one column per question). Every
+# question's Object ID is embedded directly in its header text (e.g.
+# "dd_gender object-6 Response"), rather than living in its own column, so
+# reshaping means renaming columns via that embedded token, not pivoting.
 
-library(readr)
+library(readxl)
 library(dplyr)
 library(tidyr)
+library(stringr)
 
-#' Read a raw Gorilla long-format export as all-character columns.
-#'
-#' Read everything as character deliberately: this is an event log with
-#' mixed row shapes (metadata rows have blank Trial/Response columns, answer
-#' rows are text/number/boolean depending on the question), so type
-#' coercion happens later, per-variable, once we know what each column
-#' actually represents.
-read_gorilla_questionnaire_long <- function(path) {
-  df <- read_csv(path, col_types = cols(.default = "c"), na = character())
-  names(df) <- sub("^﻿", "", names(df)) # strip a stray BOM from the first header if present
+#' Read the raw wide questionnaire export as all-character columns.
+read_gorilla_questionnaire_wide <- function(path) {
+  df <- readxl::read_excel(path, col_types = "text")
+  names(df) <- sub("^﻿", "", names(df))
   df
 }
 
-#' Reshape a Gorilla questionnaire long export into one row per participant.
+#' Reshape the wide questionnaire export into one row per participant.
 #'
-#' - Keeps only `Response Type == "response"` rows (the final submitted
-#'   value; Gorilla also logs a duplicate `"action"` row per answer).
-#' - Single-value questions (Key %in% c("value", "quantised")) become two
-#'   columns each: `<variable_name>` (the raw label/number Gorilla stored)
-#'   and `<variable_name>_quantised` (Gorilla's numeric-coded version,
-#'   ready to use for scale items without re-deriving a label->number map).
-#' - Multiselect/checkbox questions (one row per option, Key = option
-#'   label, Response = "0"/"1") become one boolean column per option
-#'   (`<variable_name>__<option_slug>`) plus one human-readable summary
-#'   column (`<variable_name>`, a "; "-joined list of the checked labels).
+#' - Drops fully blank rows (trailing sheet artifacts).
+#' - Takes `consent_given` from the "Questionnaire - Consent" row.
+#' - Takes every other answer from the "Questionnaire" row, renaming each
+#'   "<code> object-<N> <suffix>" column via `gorilla_object_map()`:
+#'   - suffix "Response" -> `<variable_name>`
+#'   - suffix "Quantised" -> `<variable_name>_quantised`
+#'   - suffix "Value" -> `<variable_name>` (single-value widgets with no
+#'     separate quantised form: free text, numeric entry, checkboxes)
+#'   - anything else (multiselect: one column per option, suffix = the
+#'     option's own label) -> `<variable_name>__<option_slug>` boolean,
+#'     plus one `<variable_name>` summary column ("; "-joined checked
+#'     option labels).
 #'
 #' Returns one row per `participant_id`, plus participant status/completion
 #' metadata useful for filtering to complete sessions once there are many.
 extract_questionnaire_answers <- function(path) {
-  raw <- read_gorilla_questionnaire_long(path) %>%
-    filter(`Response Type` == "response", !is.na(`Object ID`), `Object ID` != "")
-
-  obj_map <- gorilla_object_map()
+  raw <- read_gorilla_questionnaire_wide(path) %>%
+    filter(!is.na(`Participant Private ID`))
 
   participant_meta <- raw %>%
     distinct(`Participant Private ID`, `Participant Public ID`,
@@ -51,49 +53,86 @@ extract_questionnaire_answers <- function(path) {
            participant_status = `Participant Status`,
            participant_completion_code = `Participant Completion Code`)
 
-  single_ids <- obj_map$object_id[!obj_map$multiselect]
-  single_wide <- raw %>%
-    filter(`Object ID` %in% single_ids, Key %in% c("value", "quantised")) %>%
-    left_join(obj_map, by = c("Object ID" = "object_id")) %>%
-    mutate(col_name = if_else(Key == "quantised",
-                               paste0(variable_name, "_quantised"),
-                               variable_name)) %>%
-    distinct(`Participant Private ID`, col_name, .keep_all = TRUE) %>%
-    select(`Participant Private ID`, col_name, Response) %>%
-    pivot_wider(names_from = col_name, values_from = Response)
-
-  multi_ids <- obj_map$object_id[obj_map$multiselect]
-  multi_long <- raw %>%
-    filter(`Object ID` %in% multi_ids) %>%
-    left_join(obj_map, by = c("Object ID" = "object_id")) %>%
-    mutate(
-      option_slug = gsub("[^a-z0-9]+", "_", tolower(Key)),
-      option_slug = gsub("^_|_$", "", option_slug),
-      col_name = paste0(variable_name, "__", option_slug),
-      checked = Response == "1"
+  consent_col <- names(raw)[startsWith(names(raw), "Consent Form")][1]
+  consent <- raw %>%
+    filter(`Task Name` == "Questionnaire - Consent") %>%
+    transmute(
+      participant_id = `Participant Private ID`,
+      consent_given = .data[[consent_col]] %in% "1"
     )
 
-  multi_wide <- multi_long %>%
-    distinct(`Participant Private ID`, col_name, .keep_all = TRUE) %>%
-    select(`Participant Private ID`, col_name, checked) %>%
-    pivot_wider(names_from = col_name, values_from = checked)
+  answers_raw <- raw %>% filter(`Task Name` == "Questionnaire")
 
-  multi_summary <- multi_long %>%
-    filter(checked) %>%
-    group_by(`Participant Private ID`, variable_name) %>%
-    summarise(labels = paste(Key, collapse = "; "), .groups = "drop") %>%
-    pivot_wider(names_from = variable_name, values_from = labels)
+  obj_map <- questionnaire_object_map()
+  question_cols <- names(answers_raw)[
+    str_detect(names(answers_raw), "object-\\d+(-\\d+)?") & names(answers_raw) != consent_col
+  ]
 
-  out <- single_wide %>%
+  parsed <- tibble(header = question_cols) %>%
+    mutate(
+      object_id = str_extract(header, "object-\\d+(-\\d+)?"),
+      suffix = str_trim(str_remove(header, paste0("^.*", object_id))),
+      kind = case_when(
+        suffix == "Response" ~ "response",
+        suffix == "Quantised" ~ "quantised",
+        suffix == "Value" ~ "value",
+        TRUE ~ "multiselect_option"
+      )
+    ) %>%
+    left_join(obj_map, by = "object_id")
+
+  unmapped <- parsed %>% filter(is.na(variable_name)) %>% pull(header)
+  if (length(unmapped) > 0) {
+    warning(
+      "extract_questionnaire_answers(): ", length(unmapped),
+      " question column(s) have no entry in questionnaire_object_map() and are being dropped: ",
+      paste(unmapped, collapse = "; ")
+    )
+    parsed <- parsed %>% filter(!is.na(variable_name))
+  }
+
+  single <- parsed %>% filter(kind %in% c("response", "quantised", "value"))
+  single_wide <- answers_raw %>%
+    select(`Participant Private ID`, all_of(single$header)) %>%
     rename(participant_id = `Participant Private ID`)
-  if (nrow(multi_wide) > 0) {
-    out <- full_join(out, rename(multi_wide, participant_id = `Participant Private ID`),
-                      by = "participant_id")
-  }
-  if (nrow(multi_summary) > 0) {
-    out <- full_join(out, rename(multi_summary, participant_id = `Participant Private ID`),
-                      by = "participant_id")
+  for (i in seq_len(nrow(single))) {
+    col_name <- if (single$kind[i] == "quantised") {
+      paste0(single$variable_name[i], "_quantised")
+    } else {
+      single$variable_name[i]
+    }
+    names(single_wide)[names(single_wide) == single$header[i]] <- col_name
   }
 
-  left_join(participant_meta, out, by = "participant_id")
+  multi <- parsed %>% filter(kind == "multiselect_option")
+  if (nrow(multi) > 0) {
+    multi$option_slug <- str_trim(str_replace_all(str_replace_all(tolower(multi$suffix), "[^a-z0-9]+", "_"), "^_|_$", ""))
+
+    multi_long <- answers_raw %>%
+      select(participant_id = `Participant Private ID`, all_of(multi$header)) %>%
+      pivot_longer(-participant_id, names_to = "header", values_to = "checked_raw") %>%
+      left_join(multi %>% select(header, variable_name, suffix, option_slug), by = "header") %>%
+      mutate(checked = checked_raw %in% "1")
+
+    multi_wide <- multi_long %>%
+      mutate(col_name = paste0(variable_name, "__", option_slug)) %>%
+      select(participant_id, col_name, checked) %>%
+      pivot_wider(names_from = col_name, values_from = checked)
+
+    multi_summary <- multi_long %>%
+      filter(checked) %>%
+      group_by(participant_id, variable_name) %>%
+      summarise(labels = paste(suffix, collapse = "; "), .groups = "drop") %>%
+      pivot_wider(names_from = variable_name, values_from = labels)
+  }
+
+  out <- single_wide
+  if (nrow(multi) > 0) {
+    out <- full_join(out, multi_wide, by = "participant_id")
+    out <- full_join(out, multi_summary, by = "participant_id")
+  }
+
+  participant_meta %>%
+    left_join(out, by = "participant_id") %>%
+    left_join(consent, by = "participant_id")
 }
