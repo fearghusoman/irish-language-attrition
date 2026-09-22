@@ -103,17 +103,29 @@ compute_predictors <- function(questionnaire_wide, cao_lookup = NULL) {
     strip_level_suffix <- function(x) trimws(sub("(?i)\\s*level\\s*$", "", x, perl = TRUE))
     cao_by_letter <- collapse_cao_subgrades(cao_lookup)
 
+    # Per project decision: there's no national CAO points scale before 1992
+    # (see analysis/build_cao_lookup.R), so participants who sat the Leaving
+    # Cert earlier than the table's first year have that earliest year's
+    # points system applied to their grade instead of being left NA.
+    # `.join_year` is only used to find the matching cao_lookup row --
+    # `leaving_cert_year` itself is left untouched everywhere else (cohort
+    # calculation, output columns, etc.).
+    earliest_cao_year <- min(cao_by_letter$leaving_cert_year, na.rm = TRUE)
+
     qw <- qw %>%
       mutate(
         leaving_cert_year = suppressWarnings(as.integer(leaving_cert_year)),
+        .join_year = pmax(leaving_cert_year, earliest_cao_year),
         .join_paper = strip_level_suffix(leaving_cert_paper)
       ) %>%
       left_join(
-        cao_by_letter %>% mutate(.join_paper = strip_level_suffix(leaving_cert_paper)) %>%
-          select(-leaving_cert_paper),
-        by = c("leaving_cert_year", ".join_paper", "leaving_cert_grade")
+        cao_by_letter %>%
+          mutate(.join_paper = strip_level_suffix(leaving_cert_paper)) %>%
+          select(-leaving_cert_paper) %>%
+          rename(.join_year = leaving_cert_year),
+        by = c(".join_year", ".join_paper", "leaving_cert_grade")
       ) %>%
-      select(-.join_paper) %>%
+      select(-.join_year, -.join_paper) %>%
       rename(proficiency_score = points)
     unmatched <- !qw$proficiency_used_fallback & is.na(qw$proficiency_score)
     if (any(unmatched, na.rm = TRUE)) {
