@@ -17,11 +17,11 @@
 source("analysis/R/read_task.R")
 source("analysis/R/scoring.R")
 
-wordlist <- jsonlite::fromJSON("app/src/data/wordlist.json")
+wordlist <- jsonlite::fromJSON("analysis/resources/wordlist.json")
 
-recall_trials <- extract_task_trials("results/data-task-3js1 (2).csv", word_col = "Spreadsheet: English") %>%
+recall_trials <- extract_task_trials("results/04092026/data-task-3js1 (2).csv", word_col = "Spreadsheet: English") %>%
   rescore_task_trials(wordlist, direction = "recall")
-recognition_trials <- extract_task_trials("results/data-task-vl4k (3).csv", word_col = "Spreadsheet: Irish") %>%
+recognition_trials <- extract_task_trials("results/04092026/data-task-vl4k (3).csv", word_col = "Spreadsheet: Irish") %>%
   rescore_task_trials(wordlist, direction = "recognition")
 
 cat("--- recall trials rescored (first 10 rows) ---\n")

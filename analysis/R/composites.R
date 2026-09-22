@@ -9,6 +9,30 @@ library(dplyr)
 
 .is_yes <- function(x) tolower(trimws(x)) == "yes"
 
+#' Collapse a CAO lookup table keyed on official sub-grades (A1/A2, B1/B2/B3,
+#' C1/C2/C3, D1/D2/D3, E, F, ...) down to the single letter grade (A/B/C/D/E/F)
+#' the questionnaire actually collects (Q14 is a plain A-F dropdown, per
+#' irish-attrition-questionnaire-v35.md -- it never asks for a sub-grade).
+#'
+#' Per project decision, each letter's score is the mean of its CAO points
+#' across all of that letter's sub-grades within the same (year, paper)
+#' group -- e.g. "B" in 1998 Higher level = mean(B1, B2, B3). This is a
+#' deliberate approximation: sub-grade point values are not evenly spaced
+#' within a letter (in the 1998 example, B1=88 but B2=B3=77), so this loses
+#' some precision that a true sub-grade would have captured, but it's the
+#' only property in the raw data that's actually knowable.
+#'
+#' Rows using the post-2017 H1-H8/O1-O8/NG grade codes are dropped here --
+#' the questionnaire's fixed A-F dropdown can never produce those values,
+#' so they can never match a real response regardless of exam year.
+collapse_cao_subgrades <- function(cao_lookup) {
+  cao_lookup %>%
+    filter(grepl("^[A-F][0-9]?$", leaving_cert_grade)) %>%
+    mutate(leaving_cert_grade = sub("^([A-F]).*$", "\\1", leaving_cert_grade)) %>%
+    group_by(leaving_cert_year, leaving_cert_paper, leaving_cert_grade) %>%
+    summarise(points = mean(points, na.rm = TRUE), .groups = "drop")
+}
+
 #' Section C: the 4 core predictor variables for the primary regression model.
 #'
 #' @param cao_lookup Optional data frame with columns `leaving_cert_year`,
@@ -71,9 +95,25 @@ compute_predictors <- function(questionnaire_wide, cao_lookup = NULL) {
     )
     qw$proficiency_score <- NA_real_
   } else {
+    # NOTE: the questionnaire's `leaving_cert_paper` values are "Higher
+    # level"/"Ordinary level"/"Foundation level"; some cao_lookup sources
+    # (e.g. analysis/resources/cao_lookup.csv) use the bare "Higher"/
+    # "Ordinary"/"Foundation". Normalize both sides so the join isn't
+    # silently broken by that wording difference.
+    strip_level_suffix <- function(x) trimws(sub("(?i)\\s*level\\s*$", "", x, perl = TRUE))
+    cao_by_letter <- collapse_cao_subgrades(cao_lookup)
+
     qw <- qw %>%
-      mutate(leaving_cert_year = suppressWarnings(as.integer(leaving_cert_year))) %>%
-      left_join(cao_lookup, by = c("leaving_cert_year", "leaving_cert_paper", "leaving_cert_grade")) %>%
+      mutate(
+        leaving_cert_year = suppressWarnings(as.integer(leaving_cert_year)),
+        .join_paper = strip_level_suffix(leaving_cert_paper)
+      ) %>%
+      left_join(
+        cao_by_letter %>% mutate(.join_paper = strip_level_suffix(leaving_cert_paper)) %>%
+          select(-leaving_cert_paper),
+        by = c("leaving_cert_year", ".join_paper", "leaving_cert_grade")
+      ) %>%
+      select(-.join_paper) %>%
       rename(proficiency_score = points)
     unmatched <- !qw$proficiency_used_fallback & is.na(qw$proficiency_score)
     if (any(unmatched, na.rm = TRUE)) {

@@ -17,7 +17,7 @@ library(jsonlite)
 #'   round's file as a length-2 vector `c(recall_path, recognition_path)`
 #'   (the corresponding `Task Name` filter is skipped for those, since
 #'   each file already contains only one round).
-#' @param wordlist_path Path to `app/src/data/wordlist.json`.
+#' @param wordlist_path Path to `analysis/resources/wordlist.json`.
 #' @param cao_lookup Optional CAO-points-by-year lookup data frame -- see
 #'   `compute_predictors()`. `NULL` (the default) leaves `proficiency_score`
 #'   as `NA` with a warning.

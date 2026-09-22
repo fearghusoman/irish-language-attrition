@@ -1,239 +1,69 @@
-# Irish L2 Lexical Attrition Study — Participant Web App
+# Irish L2 Lexical Attrition Study — Analysis Project
 
-A participant-facing web app for "Revisiting lexical attrition of instructed L2 Irish"
-(University of Cologne): a single continuous session covering consent, a 60-item
-lexical recall/recognition task, and a background questionnaire, all tagged with
-one `participant_id`.
+R analysis pipeline for *"Revisiting lexical attrition of instructed L2 Irish: an exploration of levels of retention and influencing factors among adults in Ireland after extended post-instruction periods"* (University of Cologne).
 
-- **Frontend**: React + Vite SPA, deployed as a static site to GitHub Pages (`app/`)
-- **Backend**: Supabase (Postgres + PostgREST), insert-only for the public anon key via
-  Row Level Security — see `supabase/schema.sql`
-- Full architecture rationale: see the design doc the app was built from (schema,
-  security model, write-timing decisions).
+Data collection is handled entirely by **Gorilla Experiment Builder** — a single online session covering consent, a 60-item lexical recall/recognition task, and a background questionnaire, all tagged with one `Participant Private ID`. This repository is everything downstream of that: the source materials the study was built from, the raw exports Gorilla produces, and the R pipeline that turns them into analysis-ready datasets.
 
 ## Repository layout
 
 ```
-context/                            Source materials from the researcher (questionnaire, codebook,
-                                     wordlist xlsx, task instructions, WIP R analysis script)
-scripts/convert-wordlist.mjs        Converts context/*.xlsx -> app/src/data/wordlist.json + supabase/seed_word_items.sql
-supabase/schema.sql                 Full Postgres schema + RLS policies
-supabase/seed_word_items.sql        Generated: INSERT statements for the 60 word items
-supabase/questionnaire_export_view.sql  Wide Q1..Q53 view for R-compatible questionnaire export
-supabase/trials_export_view.sql     Test-mode-filtered view of `trials` for R-compatible task export
-supabase/migration_add_is_test_flag.sql  One-time migration for projects created before is_test existed
-app/                                The React/Vite SPA
-.github/workflows/deploy.yml        Builds & deploys app/ to GitHub Pages on push to main
+context/                  Source materials from the researcher: questionnaire, codebook, task
+                           instructions, wordlist. context/v1/ holds the current versions
+                           (codebook v24, questionnaire v35, task instructions v12); the files
+                           at the root of context/ are earlier superseded versions kept for
+                           reference (codebook v20, questionnaire v28, task instructions v6).
+
+handover/                 Plain-language guide (data-structure-overview.md) explaining what
+                           each Gorilla export file is, which ones matter for analysis, and
+                           which can be ignored.
+
+results/<date>/           Raw Gorilla exports, one folder per data pull (named DDMMYYYY).
+                           Each contains the questionnaire + task exports as delivered by
+                           Gorilla; once analysis/run_real_data.R has been run against a
+                           given date, a derived/ subfolder appears there with the two
+                           analysis-ready output CSVs (see results/<date>/derived/README.md).
+
+analysis/                 The R pipeline.
+  R/                        Pipeline modules: read the raw exports, rescore lexical responses
+                             per the codebook's scoring protocol, compute composite/predictor
+                             scores, summarise DVs, and assemble the participant-level and
+                             trial-level analysis datasets.
+  resources/                cao_lookup.csv (Leaving Cert grade -> CAO points, 1992-present;
+                             see build_cao_lookup.R for sourcing/limitations) and
+                             wordlist.json (the 60 study items with category/frequency/
+                             familiarity/length metadata).
+  build_cao_lookup.R        Regenerates resources/cao_lookup.csv from source.
+  run_pipeline.R            Task-scoring regression smoke test against sample data.
+  run_real_data.R           The real pipeline -- run this to produce the two output CSVs
+                             for a given results/<date>/ folder.
+
+regression-analysis/      Planning notes for the next stage: fitting the actual mixed-effects
+                           model on the trial-level dataset.
 ```
 
-## One-time setup
+## Running the analysis
 
-### 1. Create the Supabase project
+From the repo root (open `irish-attrition-project.Rproj` in RStudio, or `Rscript` from a terminal):
 
-1. Create a new Supabase project in an **EU region** (e.g. Frankfurt) — required for
-   the GDPR commitment made in the study's consent form.
-2. In the SQL editor, run `supabase/schema.sql` (creates all tables + RLS policies).
-3. Run `supabase/seed_word_items.sql` (loads the 60 word items into `word_items`).
-4. Run `supabase/questionnaire_export_view.sql` and `supabase/trials_export_view.sql`
-   (create the `questionnaire_export`/`trials_export` views used when exporting data
-   for R analysis — see "Exporting data for analysis" below).
-
-   All of these must be run as `service_role` / via the SQL editor — the anon role
-   has no write access to `word_items`, and no read access to either export view.
-
-   **If your project already existed before this step** (i.e. you ran an earlier
-   version of `schema.sql` without the `is_test` column), run
-   `supabase/migration_add_is_test_flag.sql` once first — it's an `ADD COLUMN IF
-   NOT EXISTS`, safe to run even if you're not sure.
-5. From Project Settings → API, note the **Project URL** and the **anon public key**.
-   These are safe to ship in the client bundle — every table they can touch is
-   insert-only via RLS (see `supabase/schema.sql` for the full security model).
-
-### 2. Configure the app's environment variables
-
-Create `app/.env.local` (gitignored) with:
-
+```r
+install.packages(c("readxl", "readr", "dplyr", "tidyr", "jsonlite", "tibble", "stringr"))
 ```
-VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
-VITE_SUPABASE_ANON_KEY=<your-anon-public-key>
-```
-
-For GitHub Pages deployment, add the same two values as **repository secrets**
-(`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) under Settings → Secrets and
-variables → Actions — the deploy workflow reads them from there.
-
-### 3. Enable GitHub Pages
-
-Under Settings → Pages, set the source to **GitHub Actions**. Pushing to `main`
-(with changes under `app/`) will then build and deploy automatically via
-`.github/workflows/deploy.yml`.
-
-If the repository is renamed from `irish-attrition-project`, update the `base`
-path in `app/vite.config.js` (or override at build time with `VITE_BASE_PATH`).
-
-## Running the app locally
-
-### 1. Install dependencies
 
 ```bash
-cd app
-npm install
+Rscript analysis/run_real_data.R
 ```
 
-### 2. Set up environment variables
+This reads the raw Gorilla exports (currently pointed at `results/22092026/`), rescores every lexical response per the codebook's Section E protocol, computes the questionnaire composites/predictors, and writes:
 
-The app needs a Supabase URL + anon key to start at all (it throws otherwise).
-Create `app/.env.local` (gitignored):
+- `results/<date>/derived/participant_dataset.csv` — one row per participant.
+- `results/<date>/derived/trial_level_dataset.csv` — one row per participant x item, ready for the primary mixed-effects model.
 
-```
-VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-public-key
-```
+See `results/22092026/derived/README.md` for what each output column means, and `regression-analysis/approach.md` for how the actual regression modelling is planned to proceed.
 
-You have two options here:
+`analysis/run_pipeline.R` is a smaller smoke test — it only exercises the task-scoring logic (`analysis/R/read_task.R` + `scoring.R`) against sample data, useful for checking that a change to the scoring/matching logic hasn't broken anything without needing a full real-data run.
 
-- **If you already have the real Supabase project set up** (see "One-time setup"
-  above), use its real URL/anon key. This gives you a fully working app — real
-  writes land in the tables.
-- **If you just want to click through the UI without a real backend yet**, put
-  in any placeholder values (e.g. `https://example.supabase.co` / `test-key`).
-  The app will still render and behave correctly — every write attempt will
-  just fail, retry a few times, and silently queue in `sessionStorage` (the app
-  is built not to block the session on write failures). Good enough for
-  checking screens/flow, not for checking that data actually lands.
+## Known limitations
 
-### 3. Run it
-
-```bash
-npm run dev
-```
-
-Then open **http://localhost:5173**.
-
-### Other useful commands
-
-```bash
-npm run test        # run the automated test suite
-npm run test:watch  # same, in watch mode
-npm run build        # production build to app/dist (same one GitHub Pages runs)
-```
-
-## Test mode
-
-Clicking through all 60 recall items every time you test a change is slow. Set
-these in `app/.env.local` (never set them in the GitHub Actions production
-secrets, or real participants would get the shortened list too):
-
-```
-VITE_TEST_MODE=true
-```
-
-This shortens the lexical task to 5 curated items — one per category (concrete
-noun, abstract noun, verb, adjective) plus a second verb — specifically chosen
-to exercise the trickiest matching logic (multi-alternative glosses, the
-dual-"to" case), not just whichever items happen to sort first. See
-`app/src/lib/testMode.js` for exactly which items and why.
-
-Every session run this way is written to Supabase like normal, just flagged
-`participants.is_test = true`. That's what keeps these test runs out of the
-real dataset — `questionnaire_export` and `trials_export` (see "Exporting data
-for analysis") both filter `WHERE NOT is_test`, so test click-throughs are
-safe to leave in the same Supabase project rather than needing a separate one.
-
-To use a different set of items instead of the default 5, add:
-
-```
-VITE_TEST_ITEM_IDS=1,2,3
-```
-
-(comma-separated `item_id`s from `app/src/data/wordlist.json`).
-
-## Re-generating the word list
-
-If the researcher sends an updated wordlist xlsx:
-
-```bash
-node scripts/convert-wordlist.mjs
-```
-
-This regenerates both `app/src/data/wordlist.json` (bundled into the app) and
-`supabase/seed_word_items.sql` (re-run the relevant `INSERT`s via the SQL editor)
-from the same parse, so they can't drift apart.
-
-## Exporting data for analysis
-
-Data is only readable via the Supabase **service_role** key (SQL editor or
-dashboard) — the public anon key used by the app cannot read anything back, by
-design. The export shape is aligned directly to `context/irish-attrition-analysis-script-v1.pdf`
-(the WIP R script), which expects two CSVs plus the wordlist xlsx:
-
-1. **`task_trial_data.csv`** — run `SELECT * FROM trials_export` (defined in
-   `supabase/trials_export_view.sql`) rather than exporting the `trials` table
-   directly — the view excludes test-mode sessions (see "Test mode" below) so
-   they never end up in the real dataset. Its columns otherwise already match
-   the script's expected shape
-   (`participant_id | item_id | phase | irish_target | english_gloss | category |
-   response_text | response_time_ms | live_match_result`, plus a few harmless extras
-   the script ignores). `live_match_result` is a Postgres boolean, which a CSV export
-   renders as `true`/`false` — `readr::read_csv` parses that straight into an R
-   logical column, so `live_match_result == TRUE` in the script works without any
-   conversion step.
-
-   **Important**: the script's comment says it expects this column to already reflect
-   *final* scoring (fada/edit-distance-tolerant, manual-review-resolved per codebook
-   Section E) — what the app writes is the *live routing check* only. Whoever does the
-   manual scoring pass needs to update `live_match_result` accordingly before this
-   export is fed into the script; the app's boolean type just means that step no
-   longer also has to do a string→boolean conversion at the same time.
-
-2. **`questionnaire_data.csv`** — run `SELECT * FROM questionnaire_export`
-   (defined in `supabase/questionnaire_export_view.sql`) rather than exporting the
-   `questionnaire_part*` tables directly. The view reshapes our normalized,
-   per-Part tables into the single wide, one-row-per-participant, `Q1`..`Q53`-named
-   layout the script's column-selection code (`exposure_items <- c("Q16", ...)` etc.)
-   expects. We kept the base tables normalized — that's what makes per-Part writes
-   validate correctly under insert-only RLS — and did the reshaping only at this
-   read/export boundary.
-
-   Multilingualism is the one place the script's current shape (`lang1_freq`,
-   `lang2_freq`, a semicolon-separated `lang_overflow` text field) is itself marked
-   "ADAPT" / placeholder in the script, since it was written before any real export
-   existed. The view produces exactly that shape from our `additional_languages`
-   table so the script runs unmodified today, but flag to the analyst that this was
-   a best-effort match to a placeholder, not a jointly agreed-on format.
-
-3. **Wordlist** — the script reads `context/irish-attrition-wordlist-template-v12.xlsx`
-   directly (not from Supabase) for item-level `word_length`/`freq_rank` covariates,
-   so no export is needed there.
-
-### Things worth flagging back to the researcher / analyst
-
-A few discrepancies turned up while aligning the export to the script — none of
-these were ours to silently resolve, since they're about the analysis itself:
-
-- The script's header says it "implements the analysis plan in codebook v22,
-  Section F," but the codebook we have is v20. Worth confirming nothing
-  substantive changed between those versions.
-- The codebook defines instrumental motivation as 3 items (Q25–Q27), but the
-  script's `instrumental_items` vector and reliability check only reference
-  Q25–Q26. We still export Q27 (see `supabase/questionnaire_export_view.sql`)
-  rather than drop it, but the script itself will need Q27 added if that's an
-  oversight rather than a deliberate change.
-- The CAO-points proficiency predictor is explicitly left as a TODO in the
-  script itself (`quest_raw$proficiency <- NA_real_`) pending a CAO lookup
-  table the analyst still needs to build — no action needed from the app side,
-  Q12–Q14 are exported as-is for whenever that lookup exists.
-
-## Key design notes
-
-- **No resume after a crash/reload.** Because the anon key can't read back what
-  it wrote, an interrupted session can't be automatically resumed — the
-  participant sees a message asking them to contact the researcher.
-- **Live matching is a routing check only**, not final scoring. Fada-stripping
-  (recall) and "to"-stripping + multi-alternative matching (recognition) decide
-  whether an item moves to the recognition phase; final scoring (edit-distance
-  tolerance, manual review of unlisted synonyms) is a post-hoc step in R, per
-  codebook Section E.
-- **`contact_optins` is fully decoupled** from study data (no `participant_id`,
-  no foreign key) so the optional "email me the findings" step can never be
-  joined back to a participant's responses.
+- `proficiency_score` (one of the 4 core predictors) is only populated for participants whose Leaving Cert year is 1992 or later — there is no national CAO points scale before 1992 (see the sourcing notes in `analysis/build_cao_lookup.R`), so this is a genuine historical ceiling, not a data gap to fill in.
+- The short/long-word Levenshtein tolerance used in rescoring (`analysis/R/scoring.R`) is an unconfirmed placeholder — worth confirming against the actual scoring protocol.
+- No statistical model has been fit yet — the pipeline produces the trial-level dataset the primary model needs, but stops there (see `regression-analysis/approach.md`).

@@ -98,7 +98,7 @@ score_lexical_response <- function(target, response,
 #' dataset's item fixed effects (`build_trial_level_dataset()`).
 #'
 #' @param wordlist The parsed wordlist (e.g. via
-#'   `jsonlite::fromJSON("app/src/data/wordlist.json")`).
+#'   `jsonlite::fromJSON("analysis/resources/wordlist.json")`).
 #' @param direction "recall" (Round 1) or "recognition" (Round 2).
 rescore_task_trials <- function(trials, wordlist, direction = c("recall", "recognition")) {
   direction <- match.arg(direction)
