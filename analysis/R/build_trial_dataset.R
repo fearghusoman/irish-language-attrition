@@ -16,6 +16,12 @@ library(dplyr)
 #' - the 4 core participant-level predictors (`proficiency_score`,
 #'   `exposure_composite`, `integrative_motivation_composite`,
 #'   `multilingualism_count`), repeated across that participant's rows
+#' - each phase's raw typed response, expected answer, and Gorilla's own
+#'   correctness flag (`recall_response`/`recall_expected_answer`/
+#'   `recall_correct_gorilla` and the `recognition_*` equivalents, `NA`
+#'   for items that were never reached in that phase) -- kept for the
+#'   manual review of near-miss (`retention_level == NA`) rows that
+#'   codebook Section E requires; not itself a modelling input
 #'
 #' @param recall_trials_rescored,recognition_trials_rescored From
 #'   `rescore_task_trials()`.
@@ -30,7 +36,9 @@ build_trial_level_dataset <- function(recall_trials_rescored, recognition_trials
            integrative_motivation_composite, multilingualism_count)
 
   item_retention %>%
-    select(participant_id, item_id, category, word_length, freq_rank, retention_level) %>%
+    select(participant_id, item_id, category, word_length, freq_rank, retention_level,
+           recall_expected_answer, recall_response, recall_correct_gorilla,
+           recognition_expected_answer, recognition_response, recognition_correct_gorilla) %>%
     left_join(predictors, by = "participant_id") %>%
     arrange(participant_id, item_id)
 }

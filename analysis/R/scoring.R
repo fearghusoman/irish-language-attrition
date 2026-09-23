@@ -95,7 +95,12 @@ score_lexical_response <- function(target, response,
 #' alongside the original `correct_gorilla` flag for comparison, and keeps
 #' `item_id` plus the item-level attributes (`category`, `word_length`,
 #' `freq_rank`, `familiarity_rating`) needed downstream for the trial-level
-#' dataset's item fixed effects (`build_trial_level_dataset()`).
+#' dataset's item fixed effects (`build_trial_level_dataset()`). Also keeps
+#' `expected_answer` (the correct answer for this direction: the Irish
+#' target for recall, the English gloss for recognition) alongside the
+#' participant's own `response_raw` -- both are needed for the manual
+#' review of near-miss (`correct_rescored == NA`) responses that codebook
+#' Section E requires, and dropping them would make that review impossible.
 #'
 #' @param wordlist The parsed wordlist (e.g. via
 #'   `jsonlite::fromJSON("analysis/resources/wordlist.json")`).
@@ -114,8 +119,9 @@ rescore_task_trials <- function(trials, wordlist, direction = c("recall", "recog
     left_join(wl, by = join_by) %>%
     rowwise() %>%
     mutate(
+      expected_answer = if (direction == "recall") irish_target else english_gloss,
       correct_rescored = score_lexical_response(
-        target = if (direction == "recall") irish_target else english_gloss,
+        target = expected_answer,
         response = response_raw,
         direction = direction,
         alternatives = if (direction == "recognition") unlist(english_gloss_alternatives) else NULL

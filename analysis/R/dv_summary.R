@@ -19,13 +19,20 @@ library(dplyr)
 #'
 #' Also carries the item-level attributes (`category`, `word_length`,
 #' `freq_rank`, `familiarity_rating`) needed for the trial-level dataset's
-#' item fixed effects (`build_trial_level_dataset()`).
+#' item fixed effects (`build_trial_level_dataset()`), plus each phase's
+#' raw typed response, expected answer, and Gorilla's own correctness flag
+#' -- needed to manually review any `NA` (near-miss) rescored response per
+#' codebook Section E, which isn't possible from `retention_level` alone.
 compute_item_level_retention <- function(recall_trials_rescored, recognition_trials_rescored) {
   recall_trials_rescored %>%
     select(participant_id, item_id, category, word_length, freq_rank, familiarity_rating,
-           recalled = correct_rescored) %>%
+           recall_expected_answer = expected_answer, recall_response = response_raw,
+           recall_correct_gorilla = correct_gorilla, recalled = correct_rescored) %>%
     left_join(
-      recognition_trials_rescored %>% select(participant_id, item_id, recognized = correct_rescored),
+      recognition_trials_rescored %>%
+        select(participant_id, item_id, recognition_expected_answer = expected_answer,
+               recognition_response = response_raw, recognition_correct_gorilla = correct_gorilla,
+               recognized = correct_rescored),
       by = c("participant_id", "item_id")
     ) %>%
     mutate(
