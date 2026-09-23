@@ -2373,6 +2373,7 @@ participant_id,item_id,category,word_length,freq_rank,retention_level,recall_exp
 16610592,32,verb,4,20,0,déan,rinne,0,to do,NA,0,65,1.2,1.5,0
 16610592,33,verb,7,24,2,tabhair,tabhar,0,to give/grant,give,0,65,1.2,1.5,0
 16610592,34,verb,3,33,0,tar,ag diul,0,to come,NA,0,65,1.2,1.5,0
+16610592,35,verb,5,36,1,NA,NA,NA,to get/receive,get,0,65,1.2,1.5,0
 16610592,36,verb,5,41,1,téigh,ag dull,0,to go,go,0,65,1.2,1.5,0
 16610592,37,verb,4,76,1,feic,ag siuil,0,to see,see,0,65,1.2,1.5,0
 16610592,38,verb,4,88,0,féad,an bhfuil you,0,to be able to,long,0,65,1.2,1.5,0

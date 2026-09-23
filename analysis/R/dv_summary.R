@@ -12,29 +12,49 @@ library(dplyr)
 #' Joins the recall and recognition trial tibbles on `item_id` (a stable
 #' key resolved by `rescore_task_trials()` from the actual displayed word,
 #' NOT `trial_number` -- Round 2 renumbers its smaller item subset in its
-#' own randomized order, unrelated to Round 1's numbering). Every item a
-#' participant saw in Round 1 gets a row, since Round 1 always covers all
-#' 60 items; `recognized` is `NA` for items already recalled in Round 1
-#' (they never reach Round 2).
+#' own randomized order, unrelated to Round 1's numbering).
+#'
+#' This is a full join, not a left join from the recall side: a participant
+#' can have a real recognition-phase answer for an item that has no Round 1
+#' row at all (confirmed case: a session reload landing exactly between a
+#' Round 1 timeout and its logged response row drops that item from the
+#' recall export entirely, but Gorilla's own branching still routes a
+#' non-recalled item to Round 2 regardless, so a real recognition answer
+#' can exist for it). A left join from recall would silently drop that
+#' recognition data instead of using it; `recalled` is left `NA` for such a
+#' row (there's genuinely no Round 1 record, not a `FALSE`), and
+#' `retention_level` still correctly resolves to recognized-only (1) or
+#' unclassifiable (`NA`, if recognition also failed with no recall data to
+#' confirm a real "neither" outcome) via the `case_when()` below.
 #'
 #' Also carries the item-level attributes (`category`, `word_length`,
 #' `freq_rank`, `familiarity_rating`) needed for the trial-level dataset's
-#' item fixed effects (`build_trial_level_dataset()`), plus each phase's
-#' raw typed response, expected answer, and Gorilla's own correctness flag
-#' -- needed to manually review any `NA` (near-miss) rescored response per
-#' codebook Section E, which isn't possible from `retention_level` alone.
+#' item fixed effects (`build_trial_level_dataset()`) -- coalesced across
+#' both sides since either one might be the side missing a row -- plus each
+#' phase's raw typed response, expected answer, and Gorilla's own
+#' correctness flag, needed to manually review any `NA` (near-miss)
+#' rescored response per codebook Section E, which isn't possible from
+#' `retention_level` alone.
 compute_item_level_retention <- function(recall_trials_rescored, recognition_trials_rescored) {
-  recall_trials_rescored %>%
+  recall_side <- recall_trials_rescored %>%
     select(participant_id, item_id, category, word_length, freq_rank, familiarity_rating,
            recall_expected_answer = expected_answer, recall_response = response_raw,
-           recall_correct_gorilla = correct_gorilla, recalled = correct_rescored) %>%
-    left_join(
-      recognition_trials_rescored %>%
-        select(participant_id, item_id, recognition_expected_answer = expected_answer,
-               recognition_response = response_raw, recognition_correct_gorilla = correct_gorilla,
-               recognized = correct_rescored),
-      by = c("participant_id", "item_id")
+           recall_correct_gorilla = correct_gorilla, recalled = correct_rescored)
+
+  recognition_side <- recognition_trials_rescored %>%
+    select(participant_id, item_id, category, word_length, freq_rank, familiarity_rating,
+           recognition_expected_answer = expected_answer, recognition_response = response_raw,
+           recognition_correct_gorilla = correct_gorilla, recognized = correct_rescored)
+
+  full_join(recall_side, recognition_side, by = c("participant_id", "item_id"),
+            suffix = c("", ".recognition")) %>%
+    mutate(
+      category = coalesce(category, category.recognition),
+      word_length = coalesce(word_length, word_length.recognition),
+      freq_rank = coalesce(freq_rank, freq_rank.recognition),
+      familiarity_rating = coalesce(familiarity_rating, familiarity_rating.recognition)
     ) %>%
+    select(-ends_with(".recognition")) %>%
     mutate(
       retention_level = case_when(
         recalled %in% TRUE ~ 2L,                                             # recalled
