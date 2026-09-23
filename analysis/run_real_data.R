@@ -16,6 +16,7 @@ source("analysis/R/composites.R")
 source("analysis/R/dv_summary.R")
 source("analysis/R/build_trial_dataset.R")
 source("analysis/R/build_participant_dataset.R")
+source("analysis/R/apply_manual_review.R")
 
 cao_lookup <- readr::read_csv("analysis/resources/cao_lookup.csv", show_col_types = FALSE)
 
@@ -28,7 +29,10 @@ result <- build_participant_dataset(
 )
 
 participant_dataset <- result$participant_dataset
-trial_dataset <- result$trial_dataset
+trial_dataset <- apply_manual_review(
+  result$trial_dataset,
+  review_path = "results/irish-attrition-manual-review-log-v9-final.xlsx"
+)
 
 n_participants <- nrow(participant_dataset)
 n_items <- length(unique(trial_dataset$item_id))
@@ -55,6 +59,8 @@ cat("\nexposure_composite / integrative_motivation_composite / multilingualism_c
 print(colSums(is.na(participant_dataset[c("exposure_composite", "integrative_motivation_composite", "multilingualism_count")])))
 cat("\nretention_level distribution (trial-level):\n")
 print(table(trial_dataset$retention_level, useNA = "always"))
+cat("\nretention_level_source (trial-level) -- how many rows came from manual review vs. automatic scoring:\n")
+print(table(trial_dataset$retention_level_source, useNA = "always"))
 
 dir.create("results/22092026/derived", showWarnings = FALSE, recursive = TRUE)
 readr::write_csv(participant_dataset, "results/22092026/derived/participant_dataset.csv")

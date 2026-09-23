@@ -82,14 +82,26 @@ compute_predictors <- function(questionnaire_wide, cao_lookup = NULL) {
     # isn't silently broken by that wording difference.
     strip_level_suffix <- function(x) trimws(sub("(?i)\\s*level\\s*$", "", x, perl = TRUE))
 
+    # Per project decision: participants who sat the Leaving Cert but
+    # couldn't recall their grade are assigned a D for scoring purposes
+    # (at whichever paper level they actually sat). `leaving_cert_grade`
+    # itself is left untouched (still reads "Do not remember grade") --
+    # `.join_grade` is only used to find the matching cao_lookup row, and
+    # `proficiency_grade_assumed` flags which rows this applied to.
+    qw$proficiency_grade_assumed <- tolower(trimws(qw$leaving_cert_grade)) == "do not remember grade"
+
     qw <- qw %>%
-      mutate(.join_paper = strip_level_suffix(leaving_cert_paper)) %>%
+      mutate(
+        .join_paper = strip_level_suffix(leaving_cert_paper),
+        .join_grade = if_else(proficiency_grade_assumed, "D", leaving_cert_grade)
+      ) %>%
       left_join(
         cao_lookup %>% mutate(.join_paper = strip_level_suffix(leaving_cert_paper)) %>%
-          select(-leaving_cert_paper),
-        by = c(".join_paper", "leaving_cert_grade")
+          select(-leaving_cert_paper) %>%
+          rename(.join_grade = leaving_cert_grade),
+        by = c(".join_paper", ".join_grade")
       ) %>%
-      select(-.join_paper) %>%
+      select(-.join_paper, -.join_grade) %>%
       rename(proficiency_score = points)
     unmatched <- !qw$proficiency_used_fallback & is.na(qw$proficiency_score)
     if (any(unmatched, na.rm = TRUE)) {
