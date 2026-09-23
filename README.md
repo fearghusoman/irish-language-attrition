@@ -28,9 +28,10 @@ analysis/                 The R pipeline.
                              per the codebook's scoring protocol, compute composite/predictor
                              scores, summarise DVs, and assemble the participant-level and
                              trial-level analysis datasets.
-  resources/                cao_lookup.csv (Leaving Cert grade -> CAO points, 1992-present;
-                             see build_cao_lookup.R for sourcing/limitations) and
-                             wordlist.json (the 60 study items with category/frequency/
+  resources/                cao_lookup.csv (Leaving Cert grade -> points, fixed scale by
+                             paper level, per the researcher's decision -- see
+                             build_cao_lookup.R) and wordlist.json (the 60 study items
+                             with category/frequency/
                              familiarity/length metadata).
   build_cao_lookup.R        Regenerates resources/cao_lookup.csv from source.
   run_pipeline.R            Task-scoring regression smoke test against sample data.
@@ -64,6 +65,6 @@ See `results/22092026/derived/README.md` for what each output column means, and 
 
 ## Known limitations
 
-- `proficiency_score` (one of the 4 core predictors) is only populated for participants whose Leaving Cert year is 1992 or later — there is no national CAO points scale before 1992 (see the sourcing notes in `analysis/build_cao_lookup.R`), so this is a genuine historical ceiling, not a data gap to fill in.
+- `proficiency_score` uses a fixed grade-to-points scale (year-independent, per the researcher's decision — see `analysis/build_cao_lookup.R`) and is only `NA` for participants who didn't sit the Leaving Cert or couldn't recall their grade.
 - The short/long-word Levenshtein tolerance used in rescoring (`analysis/R/scoring.R`) is an unconfirmed placeholder — worth confirming against the actual scoring protocol.
 - No statistical model has been fit yet — the pipeline produces the trial-level dataset the primary model needs, but stops there (see `regression-analysis/approach.md`).
